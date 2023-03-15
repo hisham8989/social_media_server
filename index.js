@@ -16,6 +16,15 @@ import { register } from "./controllers/auth.js";
 import { verifyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
 
+fs.readdir(process.cwd(), (err, files) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log("Files:", files);
+});
+
 /** CONFIGURATION */
 
 const __filename = fileURLToPath(import.meta.url);
