@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import env from "./environment.js";
+import fs from "fs";
 import multer from "multer";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -29,6 +30,18 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
+/** CREATE UPLOAD DESTINATION */
+const createDestinationMiddleware = (req, res, next) => {
+  const folderName = "public/assets";
+  try {
+    fs.mkdirSync(folderName, { recursive: true });
+    next();
+  } catch (err) {
+    console.error("index --> createDestinationMiddleware :", err);
+    res.status(500).json({ msg: "error in creating destination for upload" });
+  }
+};
+
 /** File Storage */
 
 const storage = multer.diskStorage({
@@ -43,9 +56,20 @@ const upload = multer({ storage });
 
 /** ROUTES WITH FILES */
 
-app.post("/auth/register", upload.single("picture"), register);
+app.post(
+  "/auth/register",
+  createDestinationMiddleware,
+  upload.single("picture"),
+  register
+);
 
-app.post("/posts", verifyToken, upload.single("picture"), createPost);
+app.post(
+  "/posts",
+  verifyToken,
+  createDestinationMiddleware,
+  upload.single("picture"),
+  createPost
+);
 
 /** ROUTES */
 
