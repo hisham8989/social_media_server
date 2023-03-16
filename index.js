@@ -19,6 +19,7 @@ import { createPost } from "./controllers/posts.js";
 fs.readdir(process.cwd(), (err, files) => {
   err && console.log("Error", err);
   console.log("Files", files);
+  console.log("__dirname", __dirname);
 });
 
 /** CONFIGURATION */
