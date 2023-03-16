@@ -32,13 +32,13 @@ app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 /** CREATE UPLOAD DESTINATION */
 const createDestinationMiddleware = (req, res, next) => {
-  const folderName = "./public/assets";
+  const folderName = __dirname + "/public/assets";
   if (!fs.existsSync(folderName)) {
     try {
       console.log("Creating Assets Folder");
       fs.mkdirSync(folderName, { recursive: true });
       console.log("Created Assets Folder");
-      const files = fs.readdirSync(".");
+      const files = fs.readdirSync(process.cwd());
       console.log("Current folder names", files);
       readdirSync();
     } catch (err) {
