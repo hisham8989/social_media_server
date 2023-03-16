@@ -22,6 +22,12 @@ fs.readdir(process.cwd(), (err, files) => {
     return;
   }
 
+  if (!fs.existsSync("./public/assets")) {
+    console.log("exist ");
+  } else {
+    console.log("does not exist");
+  }
+
   console.log("Files:", files);
 });
 
