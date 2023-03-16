@@ -16,8 +16,10 @@ import { register } from "./controllers/auth.js";
 import { verifyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
 
-const files = fs.readdir(process.cwd());
-console.log("Current folder names", files);
+fs.readdir(process.cwd(), (err, files) => {
+  err && console.log("Error", err);
+  console.log("Files", files);
+});
 
 /** CONFIGURATION */
 
@@ -35,20 +37,30 @@ app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 /** CREATE UPLOAD DESTINATION */
 const createDestinationMiddleware = (req, res, next) => {
-  const folderName = __dirname + "/public/assets";
-  if (!fs.existsSync(folderName)) {
-    try {
-      console.log("Creating Assets Folder");
-      fs.mkdirSync(folderName, { recursive: true });
-      console.log("Created Assets Folder");
-      const files = fs.readdirSync(process.cwd());
-      console.log("Current folder names", files);
-    } catch (err) {
+  const directoryPath = __dirname + "public/assets";
+  fs.mkdir(directoryPath, { recursive: true }, (err) => {
+    if (err) {
       console.error("index --> createDestinationMiddleware :", err);
       res.status(500).json({ msg: "error in creating destination for upload" });
+    } else {
+      console.log("Directory created successfully.");
     }
-  }
-  next();
+    next();
+  });
+
+  // if (!fs.existsSync(folderName)) {
+  //   try {
+  //     console.log("Creating Assets Folder");
+  //     fs.mkdirSync(folderName, { recursive: true });
+  //     console.log("Created Assets Folder");
+  //     const files = fs.readdirSync(process.cwd());
+  //     console.log("Current folder names", files);
+  //   } catch (err) {
+  //     console.error("index --> createDestinationMiddleware :", err);
+  //     res.status(500).json({ msg: "error in creating destination for upload" });
+  //   }
+  // }
+  // next();
 };
 
 /** File Storage */
