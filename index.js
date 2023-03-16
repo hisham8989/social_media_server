@@ -16,6 +16,9 @@ import { register } from "./controllers/auth.js";
 import { verifyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
 
+const files = fs.readdirSync(process.cwd());
+console.log("Current folder names", files);
+
 /** CONFIGURATION */
 
 const __filename = fileURLToPath(import.meta.url);
