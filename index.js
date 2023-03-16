@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import env from "./environment.js";
+import chalk from "chalk";
 import fs from "fs";
 import multer from "multer";
 import helmet from "helmet";
@@ -23,9 +24,12 @@ fs.readdir(process.cwd(), (err, files) => {
   }
 
   if (!fs.existsSync("./public/assets")) {
-    console.log("exist ");
+    console.log(chalk.bgRed("does not exist "));
+    console.log(chalk.bgYellow("creating directory"));
+    fs.mkdirSync("./public/assets", { recursive: true });
+    console.log(chalk.green("created directory"));
   } else {
-    console.log("does not exist");
+    console.log("exist");
   }
 
   console.log("Files:", files);
