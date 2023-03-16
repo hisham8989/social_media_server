@@ -40,7 +40,6 @@ const createDestinationMiddleware = (req, res, next) => {
       console.log("Created Assets Folder");
       const files = fs.readdirSync(process.cwd());
       console.log("Current folder names", files);
-      readdirSync();
     } catch (err) {
       console.error("index --> createDestinationMiddleware :", err);
       res.status(500).json({ msg: "error in creating destination for upload" });
