@@ -3,8 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import env from "./environment.js";
-import chalk from "chalk";
-import fs from "fs";
+import fs from "@cyclic.sh/s3fs";
 import multer from "multer";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -16,24 +15,6 @@ import postRoutes from "./routes/posts.js";
 import { register } from "./controllers/auth.js";
 import { verifyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
-
-fs.readdir(process.cwd(), (err, files) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-
-  if (!fs.existsSync("./public/assets")) {
-    console.log(chalk.bgRed("does not exist "));
-    console.log(chalk.bgYellow("creating directory"));
-    fs.mkdirSync("./public/assets", { recursive: true });
-    console.log(chalk.green("created directory"));
-  } else {
-    console.log("exist");
-  }
-
-  console.log("Files:", files);
-});
 
 /** CONFIGURATION */
 
@@ -51,17 +32,18 @@ app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 /** CREATE UPLOAD DESTINATION */
 const createDestinationMiddleware = (req, res, next) => {
-  console.log("Current directory:", process.cwd());
-  console.log("__dirname", __dirname);
-  console.log("fileName", __filename);
-  const folderName = "/public/assets";
-  try {
-    fs.mkdirSync(folderName, { recursive: true });
-    next();
-  } catch (err) {
-    console.error("index --> createDestinationMiddleware :", err);
-    res.status(500).json({ msg: "error in creating destination for upload" });
+  const folderName = "./public/assets";
+  if (!fs.existsSync(folderName)) {
+    try {
+      console.log("Creating Assets Folder");
+      fs.mkdirSync(folderName, { recursive: true });
+      console.log("Created Assets Folder");
+    } catch (err) {
+      console.error("index --> createDestinationMiddleware :", err);
+      res.status(500).json({ msg: "error in creating destination for upload" });
+    }
   }
+  next();
 };
 
 /** File Storage */
