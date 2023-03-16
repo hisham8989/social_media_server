@@ -16,7 +16,7 @@ import { register } from "./controllers/auth.js";
 import { verifyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
 
-const files = fs.readdirSync(process.cwd());
+const files = fs.readdir(process.cwd());
 console.log("Current folder names", files);
 
 /** CONFIGURATION */
