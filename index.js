@@ -1,9 +1,11 @@
 import express from "express";
+import env from "./environment.js";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
-import env from "./environment.js";
-import fs from "@cyclic.sh/s3fs";
+import fs from "fs";
+// import fs from "@cyclic.sh/s3fs";
+// import AWS from "aws-sdk";
 import multer from "multer";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -16,14 +18,7 @@ import { register } from "./controllers/auth.js";
 import { verifyToken } from "./middleware/auth.js";
 import { createPost } from "./controllers/posts.js";
 
-fs.readdir(process.cwd(), (err, files) => {
-  err && console.log("Error", err);
-  console.log("Files", files);
-  console.log("__dirname", __dirname);
-});
-
 /** CONFIGURATION */
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -31,38 +26,10 @@ app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 if ((env.name = "development")) app.use(morgan("common"));
-app.use(bodyParser.json({ limit: "30mb", extented: true }));
+app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
-
-/** CREATE UPLOAD DESTINATION */
-const createDestinationMiddleware = (req, res, next) => {
-  const directoryPath = __dirname + "public/assets";
-  fs.mkdir(directoryPath, { recursive: true }, (err) => {
-    if (err) {
-      console.error("index --> createDestinationMiddleware :", err);
-      res.status(500).json({ msg: "error in creating destination for upload" });
-    } else {
-      console.log("Directory created successfully.");
-    }
-    next();
-  });
-
-  // if (!fs.existsSync(folderName)) {
-  //   try {
-  //     console.log("Creating Assets Folder");
-  //     fs.mkdirSync(folderName, { recursive: true });
-  //     console.log("Created Assets Folder");
-  //     const files = fs.readdirSync(process.cwd());
-  //     console.log("Current folder names", files);
-  //   } catch (err) {
-  //     console.error("index --> createDestinationMiddleware :", err);
-  //     res.status(500).json({ msg: "error in creating destination for upload" });
-  //   }
-  // }
-  // next();
-};
 
 /** File Storage */
 
@@ -76,22 +43,38 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+/**create directory */
+
+const createDir = (req, res, next) => {
+  try {
+    const folderName = path.join(__dirname, "public", "assets");
+
+    // Create the parent directory if it doesn't exist
+    const parentDir = path.dirname(folderName);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+
+    // Create the child directory if it doesn't exist
+    if (!fs.existsSync(folderName)) {
+      fs.mkdir(folderName, (err) => {
+        if (err) throw err;
+        console.log("Directory created successfully!");
+        next();
+      });
+    } else {
+      console.log("Directory already exists");
+    }
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+};
+
 /** ROUTES WITH FILES */
 
-app.post(
-  "/auth/register",
-  createDestinationMiddleware,
-  upload.single("picture"),
-  register
-);
+app.post("/auth/register", createDir, upload.single("picture"), register);
 
-app.post(
-  "/posts",
-  verifyToken,
-  createDestinationMiddleware,
-  upload.single("picture"),
-  createPost
-);
+app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 /** ROUTES */
 
