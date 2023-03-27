@@ -16,7 +16,6 @@ export const register = async (req, res) => {
       location,
       occupation,
     } = req.body;
-    res.setHeader("Access-Control-Allow-Origin", "*");
 
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
