@@ -84,11 +84,6 @@ app.use("/users", userRoutes);
 
 app.use("/posts", postRoutes);
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-});
-
 /** MONGOOSE SETUP */
 
 const PORT = process.env.PORT || 6001;
