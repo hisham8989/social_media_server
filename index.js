@@ -60,11 +60,11 @@ const createDir = (req, res, next) => {
       fs.mkdir(folderName, (err) => {
         if (err) throw err;
         console.log("Directory created successfully!");
-        next();
       });
     } else {
       console.log("Directory already exists");
     }
+    next();
   } catch (error) {
     return res.status(500).json({ error });
   }
